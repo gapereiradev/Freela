@@ -1,30 +1,21 @@
+using DevFreela.Application.Consumers;
 using FluentValidation.AspNetCore;
+using Freela.API.Extensions;
 using Freela.API.Filters;
 using Freela.Application.Commands.CreateProject;
 using Freela.Application.Validators;
-using Freela.Core.Repositories;
-using Freela.Core.Services;
-using Freela.Infra.Auth;
 using Freela.Infra.Persistence;
-using Freela.Infra.Persistence.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Freela.API
 {
@@ -41,15 +32,16 @@ namespace Freela.API
         public void ConfigureServices(IServiceCollection services)
         {
 
-            var connectionString = Configuration.GetConnectionString("DevFreelaCs");
+            var connectionString = Configuration.GetConnectionString("FreelaCs");
             services.AddDbContext<FreelaDbContext>(options => options.UseSqlServer(connectionString));
             //services.AddDbContext<DevFreelaDbContext>(options => options.UseInMemoryDatabase("Devfreela"));
 
-            services.AddScoped<IProjectRepository, ProjectRepository>();
-            services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<ISkillRepository, SkillRepository>();
-            services.AddScoped<IAuthService, AuthService>();
+            services.AddHostedService<PaymentApprovedConsumer>();
 
+            services.AddHttpClient();
+
+            services
+                .AddInfrastructure();
 
             services
                  .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
